@@ -6,6 +6,7 @@ import '../../core/constants/app_text_styles.dart';
 import '../../core/utils/landscape_layout.dart';
 import '../../core/utils/number_to_words_id.dart';
 import '../../widgets/app_header.dart';
+import '../../widgets/bounce_tap.dart';
 
 /// Halaman belajar angka: swipe kiri/kanan untuk pindah angka,
 /// tap tombol suara (atau otomatis saat pindah halaman) untuk
@@ -182,8 +183,9 @@ class _NumberPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return BounceTap(
       onTap: onTapSpeak,
+      semanticLabel: 'Dengarkan angka $number',
       child: Center(
         child: SingleChildScrollView(
           child: LayoutBuilder(
@@ -262,8 +264,9 @@ class _NavButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: enabled ? onTap : null,
+    return BounceTap(
+      onTap: onTap,
+      enabled: enabled,
       child: CircleAvatar(
         radius: radius,
         backgroundColor: enabled

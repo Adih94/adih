@@ -74,7 +74,7 @@ class _SplashScreenState extends State<SplashScreen> {
             const SizedBox(height: 24),
 
             // Judul app, muncul fade + geser naik sedikit lebih lambat dari logo
-            Text('BelajarKu', style: AppTextStyles.heading.copyWith(fontSize: 32))
+            Text('Aplikasi Belajar', style: AppTextStyles.heading.copyWith(fontSize: 32))
                 .animate()
                 .fadeIn(delay: 300.ms, duration: 500.ms)
                 .slideY(begin: 0.3, end: 0, delay: 300.ms, duration: 500.ms),

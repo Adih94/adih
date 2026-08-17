@@ -17,5 +17,5 @@ Future<void> main() async {
     SystemUiMode.immersiveSticky,
   );
 
-  runApp(const BelajarKuApp());
+  runApp(const AplikasiBelajarApp());
 }

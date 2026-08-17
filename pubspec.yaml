@@ -1,4 +1,4 @@
-name: belajarku
+name: aplikasi_belajar
 description: "Aplikasi belajar anak - Huruf, Piano, Menulis"
 publish_to: 'none'
 version: 1.0.0+1
@@ -38,6 +38,7 @@ dependencies:
   # Text-to-Speech, dipakai sementara untuk suara angka/huruf
   # sebelum ada rekaman suara asli
   flutter_tts: ^4.2.0
+  flutter_svg: ^2.3.0
 
 dev_dependencies:
   flutter_test:
@@ -71,6 +72,11 @@ flutter:
     - assets/images/letter_a_activity.png
     - assets/images/letter_b_activity.png
     - assets/images/bg_letter_lesson2.png
+    - assets/images/button_play.svg
+    - assets/images/left_button.svg
+    - assets/images/right_button.svg
+    - assets/images/left_button.png
+    - assets/images/right_button.png
     # - assets/images/
     # - assets/images/icons/
     # - assets/audio/letters/

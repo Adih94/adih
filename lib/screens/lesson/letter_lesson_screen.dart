@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import '../../widgets/bounce_tap.dart';
 
 /// Aktivitas pengenalan huruf dengan contoh kata yang sesuai.
 class LetterLessonScreen extends StatefulWidget {
@@ -78,7 +79,7 @@ class _LetterLessonScreenState extends State<LetterLessonScreen> {
                 left: 42 * scale,
                 top: 48 * scale,
                 child: BounceTap(
-                  label: 'Kembali',
+                  semanticLabel: 'Kembali',
                   onTap: () => Navigator.of(context).maybePop(),
                   child: _RoundActionButton(
                     size: 106 * scale,
@@ -91,7 +92,7 @@ class _LetterLessonScreenState extends State<LetterLessonScreen> {
                 right: 170 * scale,
                 top: 49 * scale,
                 child: BounceTap(
-                  label: 'Dengarkan huruf ${_currentLetter.letter}',
+                  semanticLabel: 'Dengarkan huruf ${_currentLetter.letter}',
                   onTap: _speakCurrentLetter,
                   child: _SoundButton(scale: scale),
                 ),
@@ -100,7 +101,7 @@ class _LetterLessonScreenState extends State<LetterLessonScreen> {
                 left: 50 * scale,
                 top: 378 * scale,
                 child: BounceTap(
-                  label: 'Huruf sebelumnya',
+                  semanticLabel: 'Huruf sebelumnya',
                   onTap: _showPreviousLetter,
                   child: _RoundActionButton(
                     size: 112 * scale,
@@ -113,7 +114,7 @@ class _LetterLessonScreenState extends State<LetterLessonScreen> {
                 right: 48 * scale,
                 top: 378 * scale,
                 child: BounceTap(
-                  label: 'Huruf berikutnya',
+                  semanticLabel: 'Huruf berikutnya',
                   onTap: _showNextLetter,
                   child: _RoundActionButton(
                     size: 112 * scale,
@@ -128,7 +129,7 @@ class _LetterLessonScreenState extends State<LetterLessonScreen> {
                 width: 400 * scale,
                 height: 430 * scale,
                 child: BounceTap(
-                  label: 'Huruf ${_currentLetter.letter}',
+                  semanticLabel: 'Huruf ${_currentLetter.letter}',
                   onTap: _speakCurrentLetter,
                   child: DecoratedBox(
                     decoration: BoxDecoration(
@@ -162,79 +163,6 @@ class _LetterActivity {
     required this.word,
     required this.imageAsset,
   });
-}
-
-/// Wrapper interaksi dengan bounce yang sama untuk seluruh kontrol layar.
-class BounceTap extends StatefulWidget {
-  final Widget child;
-  final String label;
-  final VoidCallback onTap;
-
-  const BounceTap({
-    super.key,
-    required this.child,
-    required this.label,
-    required this.onTap,
-  });
-
-  @override
-  State<BounceTap> createState() => _BounceTapState();
-}
-
-class _BounceTapState extends State<BounceTap>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-  late final Animation<double> _scale;
-  bool _isTapping = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 360),
-    );
-    _scale = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween(begin: 1, end: 0.86), weight: 1),
-      TweenSequenceItem(tween: Tween(begin: 0.86, end: 1.08), weight: 2),
-      TweenSequenceItem(tween: Tween(begin: 1.08, end: 1), weight: 1.5),
-    ]).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  Future<void> _handleTap() async {
-    if (_isTapping) return;
-    _isTapping = true;
-    await _controller.forward(from: 0);
-    if (mounted) widget.onTap();
-    _isTapping = false;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      label: widget.label,
-      child: GestureDetector(
-        onTap: _handleTap,
-        child: AnimatedBuilder(
-          animation: _scale,
-          builder: (context, child) => Transform.scale(
-            scale: _scale.value,
-            child: child,
-          ),
-          child: widget.child,
-        ),
-      ),
-    );
-  }
 }
 
 class _RoundActionButton extends StatelessWidget {

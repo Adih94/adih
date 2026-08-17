@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../core/constants/app_colors.dart';
 import '../core/constants/app_text_styles.dart';
 import '../core/utils/landscape_layout.dart';
+import 'bounce_tap.dart';
 
 /// Header dengan tombol back, judul halaman, dan tombol "Beli Paket VIP".
 class AppHeader extends StatelessWidget implements PreferredSizeWidget {
@@ -30,8 +31,9 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
         ),
         child: Row(
           children: [
-            GestureDetector(
+            BounceTap(
               onTap: onBack ?? () => Navigator.of(context).maybePop(),
+              semanticLabel: 'Kembali',
               child: CircleAvatar(
                 radius: compact ? 18 : 22,
                 backgroundColor: AppColors.primaryYellow,
@@ -54,22 +56,37 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
             ),
             if (showVipButton) const SizedBox(width: 12),
             if (showVipButton)
-              ElevatedButton.icon(
-                onPressed: onVipTap,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryRed,
-                  foregroundColor: Colors.white,
+              BounceTap(
+                onTap: onVipTap,
+                semanticLabel: 'Beli Paket VIP',
+                child: Container(
                   padding: EdgeInsets.symmetric(
                     horizontal: compact ? 10 : 16,
                     vertical: compact ? 6 : 10,
                   ),
-                  textStyle: TextStyle(fontSize: compact ? 12 : 14),
-                  shape: RoundedRectangleBorder(
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryRed,
                     borderRadius: BorderRadius.circular(20),
                   ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.workspace_premium,
+                        color: Colors.white,
+                        size: compact ? 16 : 20,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Beli Paket VIP',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: compact ? 12 : 14,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                icon: Icon(Icons.workspace_premium, size: compact ? 16 : 20),
-                label: const Text('Beli Paket VIP'),
               ),
           ],
         ),

@@ -1,4 +1,4 @@
-# belajarku_new
+# Aplikasi Belajar
 
 A new Flutter project.
 

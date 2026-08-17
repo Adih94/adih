@@ -1,10 +1,12 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/routes/welcome_to_home_route.dart';
 import '../../core/utils/landscape_layout.dart';
+import '../../widgets/bounce_tap.dart';
 
-/// Halaman paling depan aplikasi: karakter menyapa + tombol "Mulai".
+/// Halaman paling depan aplikasi: karakter menyapa + tombol play.
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
 
@@ -17,15 +19,12 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   // Karakter goyang pelan (idle sway), tanpa efek melayang
   late final AnimationController _waveController;
 
-  // Gelembung ucapan muncul dengan efek "pop"
-  late final AnimationController _bubbleController;
-
   // Bintang-bintang kecil berkelip di sekitar layar
   late final AnimationController _sparkleController;
 
-  // Tombol "Mulai" memantul saat ditekan
-  late final AnimationController _buttonBounceController;
-  late final Animation<double> _buttonScale;
+  // Tombol play membesar-mengecil terus-menerus
+  late final AnimationController _buttonPulseController;
+  late final Animation<double> _buttonPulse;
 
   // Fade-out konten welcome sebelum transisi ke menu
   late final AnimationController _exitController;
@@ -47,21 +46,12 @@ class _WelcomeScreenState extends State<WelcomeScreen>
       duration: const Duration(seconds: 3),
     )..repeat();
 
-    _bubbleController = AnimationController(
+    _buttonPulseController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 600),
-    );
-
-    _buttonBounceController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 450),
-    );
-    _buttonScale = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.85), weight: 1),
-      TweenSequenceItem(tween: Tween(begin: 0.85, end: 1.1), weight: 2),
-      TweenSequenceItem(tween: Tween(begin: 1.1, end: 1.0), weight: 1.5),
-    ]).animate(
-      CurvedAnimation(parent: _buttonBounceController, curve: Curves.easeOut),
+      duration: const Duration(milliseconds: 900),
+    )..repeat(reverse: true);
+    _buttonPulse = Tween<double>(begin: 1.0, end: 1.15).animate(
+      CurvedAnimation(parent: _buttonPulseController, curve: Curves.easeInOut),
     );
 
     _exitController = AnimationController(
@@ -72,18 +62,13 @@ class _WelcomeScreenState extends State<WelcomeScreen>
       parent: _exitController,
       curve: Curves.easeIn,
     );
-
-    Future.delayed(const Duration(milliseconds: 500), () {
-      if (mounted) _bubbleController.forward();
-    });
   }
 
   @override
   void dispose() {
     _waveController.dispose();
-    _bubbleController.dispose();
     _sparkleController.dispose();
-    _buttonBounceController.dispose();
+    _buttonPulseController.dispose();
     _exitController.dispose();
     super.dispose();
   }
@@ -91,10 +76,6 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   Future<void> _goToHome() async {
     if (_isNavigating) return;
     _isNavigating = true;
-
-    _buttonBounceController.forward(from: 0);
-    await Future.delayed(const Duration(milliseconds: 280));
-    if (!mounted) return;
 
     await _exitController.forward();
     if (!mounted) return;
@@ -109,9 +90,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   @override
   Widget build(BuildContext context) {
     final scale = LandscapeLayout.contentScale(context);
-    final characterHeight = (LandscapeLayout.screenHeight(context) * 0.62)
-        .clamp(110.0, 180.0);
-    final buttonHeight = (64 * scale).clamp(52.0, 72.0);
+    final characterHeight =
+        (LandscapeLayout.screenHeight(context) * 0.62).clamp(110.0, 180.0);
+    final buttonSize = (380 * scale).clamp(300.0, 440.0);
 
     return Scaffold(
       body: Stack(
@@ -128,7 +109,8 @@ class _WelcomeScreenState extends State<WelcomeScreen>
             child: FadeTransition(
               opacity: Tween<double>(begin: 1.0, end: 0.0).animate(_exitFade),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                 child: Row(
                   children: [
                     Expanded(
@@ -140,25 +122,11 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
-                              _StandingCharacter(
-                                waveController: _waveController,
-                                height: characterHeight,
-                              ),
-                              SizedBox(width: 12 * scale),
-                              AnimatedBuilder(
-                                animation: _buttonScale,
-                                builder: (context, child) => Transform.scale(
-                                  scale: _buttonScale.value,
-                                  child: child,
-                                ),
-                                child: GestureDetector(
-                                  onTap: _goToHome,
-                                  child: Image.asset(
-                                    'assets/images/button_mulai.png',
-                                    height: buttonHeight,
-                                    fit: BoxFit.contain,
-                                    filterQuality: FilterQuality.high,
-                                  ),
+                              Transform.translate(
+                                offset: Offset(-150 * scale, 0),
+                                child: _StandingCharacter(
+                                  waveController: _waveController,
+                                  height: characterHeight,
                                 ),
                               ),
                             ],
@@ -167,32 +135,36 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                         ],
                       ),
                     ),
-                    Expanded(
-                      flex: 6,
-                      child: Center(
-                        child: AnimatedBuilder(
-                          animation: _bubbleController,
-                          builder: (context, child) {
-                            final bubbleScale = Curves.elasticOut
-                                .transform(_bubbleController.value);
-                            return Opacity(
-                              opacity: _bubbleController.value.clamp(0.0, 1.0),
-                              child: Transform.scale(
-                                scale: bubbleScale,
-                                child: child,
-                              ),
-                            );
-                          },
-                          child: _SpeechBubble(
-                            text:
-                                'Hallo teman-teman, selamat datang di dunia belajarku, '
-                                'mari belajar bersama dan semangat! 🎉',
-                            fontSize: (15 * scale).clamp(12.0, 16.0),
-                          ),
-                        ),
-                      ),
-                    ),
                   ],
+                ),
+              ),
+            ),
+          ),
+
+          // Tombol play berada mandiri di tengah bagian bawah layar.
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: -120 * scale,
+            child: SafeArea(
+              top: false,
+              child: Center(
+                child: AnimatedBuilder(
+                  animation: _buttonPulse,
+                  builder: (context, child) => Transform.scale(
+                    scale: _buttonPulse.value,
+                    child: child,
+                  ),
+                  child: BounceTap(
+                    onTap: _goToHome,
+                    semanticLabel: 'Mulai',
+                    child: SvgPicture.asset(
+                      'assets/images/button_play.svg',
+                      width: buttonSize,
+                      height: buttonSize,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -284,63 +256,6 @@ class _StandingCharacter extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-/// Gelembung ucapan putih dengan ekor kecil di bawah, berisi teks sapaan.
-class _SpeechBubble extends StatelessWidget {
-  final String text;
-  final double fontSize;
-
-  const _SpeechBubble({
-    required this.text,
-    this.fontSize = 16,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          margin: const EdgeInsets.symmetric(horizontal: 8),
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(28),
-            border: Border.all(color: AppColors.primaryPink, width: 3),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.15),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Text(
-            text,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: fontSize,
-              fontWeight: FontWeight.w700,
-              color: AppColors.textDark,
-              height: 1.3,
-            ),
-          ),
-        ),
-        Transform.rotate(
-          angle: pi / 4,
-          child: Container(
-            width: 18,
-            height: 18,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border.all(color: AppColors.primaryPink, width: 3),
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

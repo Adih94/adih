@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../data/models/category_model.dart';
+import 'bounce_tap.dart';
 import 'bubble_text.dart';
 import 'star_burst_effect.dart';
 
@@ -37,16 +38,11 @@ class _CategoryIconButtonState extends State<CategoryIconButton>
 
     _bounceController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 500),
+      duration: kBounceTapDuration,
     );
 
-    _scaleAnimation = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.82), weight: 1),
-      TweenSequenceItem(tween: Tween(begin: 0.82, end: 1.12), weight: 2),
-      TweenSequenceItem(tween: Tween(begin: 1.12, end: 1.0), weight: 1.5),
-    ]).animate(
-      CurvedAnimation(parent: _bounceController, curve: Curves.elasticOut),
-    );
+    // Animasi skala sama persis dengan tombol Play (button_play).
+    _scaleAnimation = buildBounceScaleAnimation(_bounceController);
 
     _starController = AnimationController(
       vsync: this,
@@ -68,8 +64,8 @@ class _CategoryIconButtonState extends State<CategoryIconButton>
     _bounceController.forward(from: 0);
     _starController.forward(from: 0);
 
-    // Tunggu animasi bounce + bintang pecah selesai sebelum navigasi
-    await Future.delayed(const Duration(milliseconds: 520));
+    // Tunggu animasi bounce (sama seperti tombol Play) selesai sebelum navigasi
+    await Future.delayed(kBounceTapActionDelay);
     if (!mounted) return;
 
     widget.onTap();

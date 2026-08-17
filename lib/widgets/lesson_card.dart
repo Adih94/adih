@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../core/constants/app_colors.dart';
 import '../core/constants/app_text_styles.dart';
 import '../data/models/lesson_model.dart';
+import 'bounce_tap.dart';
 import 'vip_badge.dart';
 
 /// Card lesson dengan thumbnail opsional, animasi huruf, dan efek bounce.
@@ -37,15 +38,10 @@ class _LessonCardState extends State<LessonCard>
     super.initState();
     _bounceController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 420),
+      duration: kBounceTapDuration,
     );
-    _bounceScale = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.9), weight: 1),
-      TweenSequenceItem(tween: Tween(begin: 0.9, end: 1.05), weight: 2),
-      TweenSequenceItem(tween: Tween(begin: 1.05, end: 1.0), weight: 1.5),
-    ]).animate(
-      CurvedAnimation(parent: _bounceController, curve: Curves.easeOutCubic),
-    );
+    // Animasi skala sama persis dengan tombol Play (button_play).
+    _bounceScale = buildBounceScaleAnimation(_bounceController);
     _letterController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1100),

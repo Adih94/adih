@@ -1,6 +1,6 @@
 {
-    "name": "belajarku_new",
-    "short_name": "belajarku_new",
+    "name": "Aplikasi Belajar",
+    "short_name": "Aplikasi Belajar",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

@@ -6,6 +6,7 @@ import '../../core/constants/app_text_styles.dart';
 import '../../core/utils/landscape_layout.dart';
 import '../../data/models/reading_word_model.dart';
 import '../../widgets/app_header.dart';
+import '../../widgets/bounce_tap.dart';
 
 /// Halaman belajar membaca: tampilkan suku kata terpisah (mis. "bo" "la"),
 /// tap tiap suku kata untuk dengar suaranya, lalu tap kata gabungan
@@ -202,8 +203,9 @@ class _ReadingWordPage extends StatelessWidget {
             SizedBox(height: spacingMedium),
 
             // Kata gabungan (hasil akhir)
-            GestureDetector(
+            BounceTap(
               onTap: () => onSpeak(wordData.word),
+              semanticLabel: 'Dengarkan kata ${wordData.word}',
               child: Container(
                 padding: EdgeInsets.symmetric(
                   horizontal: isCompact ? 20 : 32,
@@ -263,8 +265,9 @@ class _SyllableBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return BounceTap(
       onTap: onTap,
+      semanticLabel: 'Dengarkan suku kata $text',
       child: Container(
         width: boxSize,
         height: boxSize,
@@ -311,8 +314,9 @@ class _NavButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: enabled ? onTap : null,
+    return BounceTap(
+      onTap: onTap,
+      enabled: enabled,
       child: CircleAvatar(
         radius: radius,
         backgroundColor: enabled
