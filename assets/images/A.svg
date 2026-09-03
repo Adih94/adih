@@ -1,0 +1,134 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 500 500"
+     width="500" height="500">
+
+  <defs>
+    <!-- Green body gradient -->
+    <linearGradient id="green" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#B5D957"/>
+      <stop offset="55%" stop-color="#9CC63F"/>
+      <stop offset="100%" stop-color="#82B52F"/>
+    </linearGradient>
+
+    <!-- Soft shadow -->
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="170%">
+      <feDropShadow dx="0" dy="7" stdDeviation="8"
+                    flood-color="#C8AFC7" flood-opacity="0.30"/>
+    </filter>
+  </defs>
+
+  <!--
+    TRANSPARENT BACKGROUND:
+    There is intentionally NO background rectangle.
+  -->
+
+  <!-- Soft white outer border/shadow -->
+  <path d="
+    M 126,414
+    C 104,414 87,401 80,381
+    C 77,372 77,362 81,351
+    L 168,93
+    C 179,59 206,39 241,37
+    C 276,35 307,54 320,88
+    L 418,351
+    C 425,370 421,390 408,404
+    C 397,416 382,422 365,422
+    L 342,422
+    C 319,422 302,409 294,389
+    L 281,354
+    L 219,354
+    L 207,389
+    C 200,410 183,422 159,422
+    Z"
+    fill="white"
+    stroke="white"
+    stroke-width="18"
+    stroke-linejoin="round"
+    filter="url(#shadow)"/>
+
+  <!-- Main green A -->
+  <path d="
+    M 126,405
+    C 109,405 96,395 91,380
+    C 89,373 89,366 92,358
+    L 177,103
+    C 187,73 209,57 239,55
+    C 269,53 294,69 305,99
+    L 402,358
+    C 407,373 403,389 393,398
+    C 386,403 378,407 366,407
+    L 345,407
+    C 328,407 316,398 310,382
+    L 295,341
+    C 292,333 285,328 276,328
+    L 224,328
+    C 215,328 208,333 205,341
+    L 191,382
+    C 185,398 173,407 156,407
+    Z
+
+    M 250,128
+    C 245,128 241,132 239,138
+    L 209,239
+    C 206,248 212,255 221,255
+    L 279,255
+    C 288,255 294,248 291,239
+    L 262,138
+    C 260,132 256,128 250,128
+    Z"
+    fill="url(#green)"
+    fill-rule="evenodd"
+    stroke="#F8F8F8"
+    stroke-width="4"
+    stroke-linejoin="round"/>
+
+  <!-- Dashed road line around the outside of A -->
+  <path d="
+    M 126,384
+    C 115,384 108,378 105,368
+    L 190,112
+    C 198,87 216,73 240,71
+    C 264,70 284,83 293,108
+    L 390,366
+    C 394,377 388,384 377,384
+    L 350,384
+    C 342,384 337,379 334,371
+    L 319,330
+    C 313,313 300,305 282,305
+    L 218,305
+    C 200,305 187,314 181,330
+    L 167,371
+    C 164,380 157,384 148,384
+    Z"
+    fill="none"
+    stroke="white"
+    stroke-width="3"
+    stroke-dasharray="12 10"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    opacity="0.95"/>
+
+  <!-- Dashed line around the triangular center opening -->
+  <path d="
+    M 250,146
+    L 226,237
+    L 274,237
+    Z"
+    fill="none"
+    stroke="white"
+    stroke-width="3"
+    stroke-dasharray="9 8"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    opacity="0.95"/>
+
+  <!-- Small glossy highlight -->
+  <path d="
+    M 204,104
+    C 216,82 232,73 249,72"
+    fill="none"
+    stroke="white"
+    stroke-width="5"
+    stroke-linecap="round"
+    opacity="0.35"/>
+</svg>

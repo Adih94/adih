@@ -72,6 +72,7 @@ flutter:
     - assets/images/letter_a_activity.png
     - assets/images/letter_b_activity.png
     - assets/images/bg_letter_lesson2.png
+    - assets/images/A.svg
     - assets/images/button_play.svg
     - assets/images/left_button.svg
     - assets/images/right_button.svg

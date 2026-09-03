@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import '../../widgets/bounce_tap.dart';
 
@@ -19,6 +20,7 @@ class _LetterLessonScreenState extends State<LetterLessonScreen> {
       letter: 'A',
       word: 'apel',
       imageAsset: 'assets/images/letter_a_activity.png',
+      letterAsset: 'assets/images/A.svg',
     ),
     _LetterActivity(
       letter: 'B',
@@ -131,18 +133,23 @@ class _LetterLessonScreenState extends State<LetterLessonScreen> {
                 child: BounceTap(
                   semanticLabel: 'Huruf ${_currentLetter.letter}',
                   onTap: _speakCurrentLetter,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFF8BC93B).withOpacity(0.16),
-                          blurRadius: 22 * scale,
-                          spreadRadius: 4 * scale,
+                  child: _currentLetter.letterAsset != null
+                      ? SvgPicture.asset(
+                          _currentLetter.letterAsset!,
+                          fit: BoxFit.contain,
+                        )
+                      : DecoratedBox(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFF8BC93B).withOpacity(0.16),
+                                blurRadius: 22 * scale,
+                                spreadRadius: 4 * scale,
+                              ),
+                            ],
+                          ),
                         ),
-                      ],
-                    ),
-                  ),
                 ),
               ),
             ],
@@ -157,11 +164,13 @@ class _LetterActivity {
   final String letter;
   final String word;
   final String imageAsset;
+  final String? letterAsset;
 
   const _LetterActivity({
     required this.letter,
     required this.word,
     required this.imageAsset,
+    this.letterAsset,
   });
 }
 
