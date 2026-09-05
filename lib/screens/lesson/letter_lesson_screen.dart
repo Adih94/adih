@@ -1,10 +1,11 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_tts/flutter_tts.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../widgets/bounce_tap.dart';
 
 /// Aktivitas pengenalan huruf A–Z.
-/// Satu layout dipakai untuk semua huruf: latar sama, huruf besar & kecil,
-/// serta ilustrasi contoh kata Bahasa Indonesia.
+/// Layout & latar identik untuk semua huruf (mengikuti halaman A),
+/// hanya warna huruf dan ilustrasi kata yang berbeda.
 class LetterLessonScreen extends StatefulWidget {
   const LetterLessonScreen({super.key});
 
@@ -13,63 +14,59 @@ class LetterLessonScreen extends StatefulWidget {
 }
 
 class _LetterLessonScreenState extends State<LetterLessonScreen> {
-  late final FlutterTts _tts;
+  final AudioPlayer _player = AudioPlayer();
   int _letterIndex = 0;
+  int _playToken = 0;
 
-  static const _letters = <_LetterActivity>[
-    _LetterActivity(letter: 'A', word: 'Apel', imageAsset: 'assets/images/illus_a.png'),
-    _LetterActivity(letter: 'B', word: 'Beruang', imageAsset: 'assets/images/illus_b.png'),
-    _LetterActivity(letter: 'C', word: 'Cicak', imageAsset: 'assets/images/illus_c.png'),
-    _LetterActivity(letter: 'D', word: 'Durian', imageAsset: 'assets/images/illus_d.png'),
-    _LetterActivity(letter: 'E', word: 'Es Krim', imageAsset: 'assets/images/illus_e.png'),
-    _LetterActivity(letter: 'F', word: 'Foto', imageAsset: 'assets/images/illus_f.png'),
-    _LetterActivity(letter: 'G', word: 'Gajah', imageAsset: 'assets/images/illus_g.png'),
-    _LetterActivity(letter: 'H', word: 'Harimau', imageAsset: 'assets/images/illus_h.png'),
-    _LetterActivity(letter: 'I', word: 'Ikan', imageAsset: 'assets/images/illus_i.png'),
-    _LetterActivity(letter: 'J', word: 'Jeruk', imageAsset: 'assets/images/illus_j.png'),
-    _LetterActivity(letter: 'K', word: 'Kucing', imageAsset: 'assets/images/illus_k.png'),
-    _LetterActivity(letter: 'L', word: 'Lampu', imageAsset: 'assets/images/illus_l.png'),
-    _LetterActivity(letter: 'M', word: 'Mangga', imageAsset: 'assets/images/illus_m.png'),
-    _LetterActivity(letter: 'N', word: 'Nanas', imageAsset: 'assets/images/illus_n.png'),
-    _LetterActivity(letter: 'O', word: 'Orang', imageAsset: 'assets/images/illus_o.png'),
-    _LetterActivity(letter: 'P', word: 'Pisang', imageAsset: 'assets/images/illus_p.png'),
-    _LetterActivity(letter: 'Q', word: 'Queen', imageAsset: 'assets/images/illus_q.png'),
-    _LetterActivity(letter: 'R', word: 'Roti', imageAsset: 'assets/images/illus_r.png'),
-    _LetterActivity(letter: 'S', word: 'Sapi', imageAsset: 'assets/images/illus_s.png'),
-    _LetterActivity(letter: 'T', word: 'Topi', imageAsset: 'assets/images/illus_t.png'),
-    _LetterActivity(letter: 'U', word: 'Ular', imageAsset: 'assets/images/illus_u.png'),
-    _LetterActivity(letter: 'V', word: 'Vas', imageAsset: 'assets/images/illus_v.png'),
-    _LetterActivity(letter: 'W', word: 'Wortel', imageAsset: 'assets/images/illus_w.png'),
-    _LetterActivity(letter: 'X', word: 'Xilofon', imageAsset: 'assets/images/illus_x.png'),
-    _LetterActivity(letter: 'Y', word: 'Yoyo', imageAsset: 'assets/images/illus_y.png'),
-    _LetterActivity(letter: 'Z', word: 'Zebra', imageAsset: 'assets/images/illus_z.png'),
+  static const _words = <String>[
+    'Apel', 'Beruang', 'Cicak', 'Durian', 'Es Krim', 'Foto', 'Gajah',
+    'Harimau', 'Ikan', 'Jeruk', 'Kucing', 'Lampu', 'Mangga', 'Nanas',
+    'Orang', 'Pisang', 'Queen', 'Roti', 'Sapi', 'Topi', 'Ular', 'Vas',
+    'Wortel', 'Xilofon', 'Yoyo', 'Zebra',
   ];
+
+  static final _letters = List<_LetterActivity>.generate(26, (i) {
+    final lower = String.fromCharCode(97 + i);
+    return _LetterActivity(
+      key: lower,
+      letter: lower.toUpperCase(),
+      word: _words[i],
+      letterAsset: 'assets/images/letter_$lower.png',
+      imageAsset: 'assets/images/illus_$lower.png',
+    );
+  });
 
   _LetterActivity get _currentLetter => _letters[_letterIndex];
   bool get _isFirst => _letterIndex == 0;
   bool get _isLast => _letterIndex >= _letters.length - 1;
 
   @override
-  void initState() {
-    super.initState();
-    _tts = FlutterTts();
-    _tts.setLanguage('id-ID');
-    _tts.setSpeechRate(0.35);
-  }
-
-  @override
   void dispose() {
-    _tts.stop();
+    _player.dispose();
     super.dispose();
   }
 
-  Future<void> _speakCurrentLetter() async {
-    await _tts.stop();
-    await _tts.speak(
-      '${_currentLetter.letter}. '
-      '${_currentLetter.letter} seperti ${_currentLetter.word}',
-    );
+  Future<void> _playClips(List<String> assets) async {
+    final token = ++_playToken;
+    await _player.stop();
+    for (final asset in assets) {
+      if (token != _playToken || !mounted) return;
+      final done = _player.onPlayerComplete.first;
+      await _player.play(AssetSource(asset));
+      await done.timeout(const Duration(seconds: 4), onTimeout: () {});
+    }
   }
+
+  Future<void> _speakLetter() =>
+      _playClips(['audio/letters/${_currentLetter.key}.mp3']);
+
+  Future<void> _speakWord() =>
+      _playClips(['audio/words/${_currentLetter.key}.mp3']);
+
+  Future<void> _speakCurrentLetter() => _playClips([
+        'audio/letters/${_currentLetter.key}.mp3',
+        'audio/words/${_currentLetter.key}.mp3',
+      ]);
 
   void _showPreviousLetter() {
     if (_isFirst) return;
@@ -86,29 +83,32 @@ class _LetterLessonScreenState extends State<LetterLessonScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: _LetterStage.backgroundColor,
       body: LayoutBuilder(
         builder: (context, constraints) {
           final scale = constraints.maxWidth / 1600;
+          final stageScale = [
+            constraints.maxWidth / _LetterStage.stageWidth,
+            constraints.maxHeight / _LetterStage.stageHeight,
+          ].reduce((a, b) => a > b ? a : b);
 
           return Stack(
             fit: StackFit.expand,
             children: [
-              Image.asset(
-                'assets/images/bg_letter_generic.png',
-                fit: BoxFit.cover,
-              ),
-
-              // Kartu utama: huruf besar-kecil + ilustrasi kata.
-              Positioned(
-                left: 220 * scale,
-                right: 220 * scale,
-                top: 250 * scale,
-                bottom: 120 * scale,
-                child: _LetterCard(
-                  key: ValueKey(_currentLetter.letter),
-                  activity: _currentLetter,
-                  scale: scale,
-                  onTap: _speakCurrentLetter,
+              ClipRect(
+                child: OverflowBox(
+                  maxWidth: double.infinity,
+                  maxHeight: double.infinity,
+                  child: SizedBox(
+                    width: _LetterStage.stageWidth * stageScale,
+                    height: _LetterStage.stageHeight * stageScale,
+                    child: _LetterStage(
+                      key: ValueKey(_currentLetter.letter),
+                      activity: _currentLetter,
+                      onLetterTap: _speakLetter,
+                      onWordTap: _speakWord,
+                    ),
+                  ),
                 ),
               ),
 
@@ -181,112 +181,111 @@ class _LetterLessonScreenState extends State<LetterLessonScreen> {
   }
 }
 
-class _LetterCard extends StatelessWidget {
-  final _LetterActivity activity;
-  final double scale;
-  final VoidCallback onTap;
+/// Panggung berukuran tetap (mengikuti gambar latar 1809x869) sehingga
+/// posisi huruf, tanda "=", ilustrasi, dan label selalu sama di semua huruf.
+class _LetterStage extends StatelessWidget {
+  static const double stageWidth = 1809;
+  static const double stageHeight = 869;
+  static const Color backgroundColor = Color(0xFFF6F4FC);
 
-  const _LetterCard({
+  final _LetterActivity activity;
+  final VoidCallback onLetterTap;
+  final VoidCallback onWordTap;
+
+  const _LetterStage({
     super.key,
     required this.activity,
-    required this.scale,
-    required this.onTap,
+    required this.onLetterTap,
+    required this.onWordTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return BounceTap(
-      semanticLabel: 'Huruf ${activity.letter}, ${activity.word}',
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.symmetric(
-          horizontal: 60 * scale,
-          vertical: 40 * scale,
-        ),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.94),
-          borderRadius: BorderRadius.circular(48 * scale),
-          border: Border.all(color: const Color(0xFFFFE08A), width: 8 * scale),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.16),
-              blurRadius: 26 * scale,
-              offset: Offset(0, 12 * scale),
-            ),
-          ],
-        ),
-        child: Row(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final s = constraints.maxWidth / stageWidth;
+
+        return Stack(
+          fit: StackFit.expand,
           children: [
-            // Huruf besar & kecil.
-            Expanded(
+            Image.asset('assets/images/bg_letter_base.png', fit: BoxFit.fill),
+
+            // Huruf besar (kiri).
+            Positioned(
+              left: 360 * s,
+              top: 225 * s,
+              width: 390 * s,
+              height: 410 * s,
+              child: BounceTap(
+                semanticLabel: 'Huruf ${activity.letter}',
+                onTap: onLetterTap,
+                child: Image.asset(activity.letterAsset, fit: BoxFit.contain),
+              ),
+            ),
+
+            // Ilustrasi kata (kanan).
+            Positioned(
+              left: 1040 * s,
+              top: 165 * s,
+              width: 450 * s,
+              height: 450 * s,
+              child: BounceTap(
+                semanticLabel: activity.word,
+                onTap: onWordTap,
+                child: Image.asset(activity.imageAsset, fit: BoxFit.contain),
+              ),
+            ),
+
+            // Label nama kata.
+            Positioned(
+              left: 1040 * s,
+              width: 450 * s,
+              top: 618 * s,
               child: Center(
-                child: FittedBox(
-                  fit: BoxFit.contain,
-                  child: RichText(
-                    text: TextSpan(
-                      children: [
-                        TextSpan(
-                          text: activity.letter,
-                          style: TextStyle(
-                            fontSize: 300 * scale,
-                            fontWeight: FontWeight.w800,
-                            color: const Color(0xFF7452E8),
-                            height: 1,
-                          ),
-                        ),
-                        TextSpan(
-                          text: activity.letter.toLowerCase(),
-                          style: TextStyle(
-                            fontSize: 300 * scale,
-                            fontWeight: FontWeight.w800,
-                            color: const Color(0xFFFF7EB3),
-                            height: 1,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                child: BounceTap(
+                  semanticLabel: 'Kata ${activity.word}',
+                  onTap: onWordTap,
+                  child: _WordLabel(word: activity.word, scale: s),
                 ),
               ),
             ),
-
-            // Garis pemisah.
-            Container(
-              width: 4 * scale,
-              margin: EdgeInsets.symmetric(vertical: 20 * scale),
-              color: const Color(0xFFFFE08A),
-            ),
-
-            // Ilustrasi + nama kata.
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Expanded(
-                    child: Padding(
-                      padding: EdgeInsets.only(top: 8 * scale),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(28 * scale),
-                        child: Image.asset(
-                          activity.imageAsset,
-                          fit: BoxFit.contain,
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 18 * scale),
-                  Text(
-                    activity.word,
-                    style: TextStyle(
-                      fontSize: 74 * scale,
-                      fontWeight: FontWeight.w800,
-                      color: const Color(0xFF5A3EC8),
-                    ),
-                  ),
-                ],
-              ),
-            ),
           ],
+        );
+      },
+    );
+  }
+}
+
+class _WordLabel extends StatelessWidget {
+  final String word;
+  final double scale;
+
+  const _WordLabel({required this.word, required this.scale});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      constraints: BoxConstraints(minWidth: 330 * scale),
+      padding: EdgeInsets.symmetric(horizontal: 48 * scale, vertical: 18 * scale),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(60 * scale),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFB7A8D9).withOpacity(0.45),
+            blurRadius: 14 * scale,
+            offset: Offset(0, 6 * scale),
+          ),
+        ],
+      ),
+      child: Text(
+        word,
+        textAlign: TextAlign.center,
+        style: GoogleFonts.baloo2(
+          fontSize: 66 * scale,
+          fontWeight: FontWeight.w800,
+          color: const Color(0xFF3B2B2B),
+          height: 1.1,
         ),
       ),
     );
@@ -294,13 +293,17 @@ class _LetterCard extends StatelessWidget {
 }
 
 class _LetterActivity {
+  final String key;
   final String letter;
   final String word;
+  final String letterAsset;
   final String imageAsset;
 
   const _LetterActivity({
+    required this.key,
     required this.letter,
     required this.word,
+    required this.letterAsset,
     required this.imageAsset,
   });
 }

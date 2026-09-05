@@ -79,6 +79,8 @@ flutter:
     - assets/images/right_button.svg
     - assets/images/left_button.png
     - assets/images/right_button.png
+    - assets/audio/letters/
+    - assets/audio/words/
     # - assets/images/
     # - assets/images/icons/
     # - assets/audio/letters/
