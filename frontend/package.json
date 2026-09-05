@@ -1,0 +1,9 @@
+{
+  "name": "aplikasi-belajar-web-server",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Static server for compiled Flutter web build",
+  "scripts": {
+    "start": "node server.js"
+  }
+}

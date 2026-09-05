@@ -17,6 +17,25 @@
   <base href="$FLUTTER_BASE_HREF">
 
   <meta charset="UTF-8">
+  <!-- Locale safety guard: prevent "Incorrect locale information provided" crash
+       when a browser reports a malformed/empty locale. -->
+  <script>
+    (function () {
+      function safe(v) {
+        try {
+          if (!v || typeof v !== 'string') return 'en-US';
+          return new Intl.Locale(v.replace(/_/g, '-')).toString();
+        } catch (e) { return 'en-US'; }
+      }
+      try {
+        var lang = safe(navigator.language);
+        Object.defineProperty(navigator, 'language', { get: function () { return lang; } });
+        Object.defineProperty(navigator, 'languages', {
+          get: function () { return [lang]; }
+        });
+      } catch (e) {}
+    })();
+  </script>
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="description" content="A new Flutter project.">
 
