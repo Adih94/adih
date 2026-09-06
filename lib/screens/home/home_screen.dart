@@ -6,6 +6,7 @@ import '../../widgets/app_header.dart';
 import '../../widgets/category_icon_button.dart';
 import '../../widgets/cute_arrow_button.dart';
 import '../category/category_screen.dart';
+import '../lesson/letter_lesson_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -99,6 +100,16 @@ class _HomeScreenState extends State<HomeScreen> {
                                   width: cardSize.width,
                                   height: cardSize.height,
                                   onTap: () {
+                                    if (category.id == 'huruf') {
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (_) =>
+                                              const LetterLessonScreen(),
+                                        ),
+                                      );
+                                      return;
+                                    }
+
                                     Navigator.of(context).push(
                                       MaterialPageRoute(
                                         builder: (_) =>
