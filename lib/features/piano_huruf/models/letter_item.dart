@@ -7,6 +7,7 @@ class LetterItem {
   final String letter;
   final String word;
   final String emoji;
+  final String letterAsset;
   final String illustrationAsset;
   final String voiceAsset;
   final String pianoAsset;
@@ -17,6 +18,7 @@ class LetterItem {
     required this.letter,
     required this.word,
     required this.emoji,
+    required this.letterAsset,
     required this.illustrationAsset,
     required this.voiceAsset,
     required this.pianoAsset,

@@ -23,6 +23,12 @@ class _PianoScreenState extends State<PianoScreen>
   );
   final _game = GameManager();
   late final AnimationController _starController;
+  int _firstVisibleIndex = 0;
+
+  List<LetterItem> get _visibleLetters => pianoLetters
+      .skip(_firstVisibleIndex)
+      .take(12)
+      .toList(growable: false);
 
   @override
   void initState() {
@@ -42,10 +48,22 @@ class _PianoScreenState extends State<PianoScreen>
     super.dispose();
   }
 
-  void _press(LetterItem item) {
+  void _press(LetterItem item, int slot) {
     _game.press(item);
     _starController.forward(from: 0);
     _audio.playLetter(item);
+
+    // Pressing L changes the first key from A to M; the next page is M-X.
+    if (slot == _visibleLetters.length - 1) {
+      Future<void>.delayed(const Duration(milliseconds: 190), () {
+        if (!mounted) return;
+        setState(() {
+          _firstVisibleIndex = _firstVisibleIndex + 12 >= pianoLetters.length
+              ? 0
+              : _firstVisibleIndex + 12;
+        });
+      });
+    }
   }
 
   @override
@@ -69,6 +87,7 @@ class _PianoScreenState extends State<PianoScreen>
                       animation: Listenable.merge([_game, _starController]),
                       builder: (context, _) => _PinkToyPiano(
                         active: _game.selectedLetter ?? pianoLetters.first,
+                        visibleLetters: _visibleLetters,
                         starProgress: _starController.value,
                         onPressed: _press,
                       ),
@@ -84,11 +103,13 @@ class _PianoScreenState extends State<PianoScreen>
 
 class _PinkToyPiano extends StatelessWidget {
   final LetterItem active;
+  final List<LetterItem> visibleLetters;
   final double starProgress;
-  final ValueChanged<LetterItem> onPressed;
+  final void Function(LetterItem item, int slot) onPressed;
 
   const _PinkToyPiano({
     required this.active,
+    required this.visibleLetters,
     required this.starProgress,
     required this.onPressed,
   });
@@ -135,12 +156,10 @@ class _PinkToyPiano extends StatelessWidget {
                       right: unit * .14,
                       bottom: unit * .12,
                       height: unit * .39,
-                      child: _Keyboard(onPressed: onPressed),
-                    ),
-                    Positioned(
-                      left: unit * .035,
-                      bottom: unit * .18,
-                      child: _Speaker(size: unit * .28),
+                      child: _Keyboard(
+                        letters: visibleLetters,
+                        onPressed: onPressed,
+                      ),
                     ),
                     Positioned(
                       right: unit * .035,
@@ -189,7 +208,7 @@ class _FaceHeader extends StatelessWidget {
                 alignment: Alignment.center,
                 clipBehavior: Clip.none,
                 children: [
-                  _ActiveLetter(letter: active.letter),
+                  _ActiveLetter(letterAsset: active.letterAsset),
                   StarBurstEffect(progress: starProgress),
                 ],
               ),
@@ -201,8 +220,8 @@ class _FaceHeader extends StatelessWidget {
 }
 
 class _ActiveLetter extends StatelessWidget {
-  final String letter;
-  const _ActiveLetter({required this.letter});
+  final String letterAsset;
+  const _ActiveLetter({required this.letterAsset});
 
   @override
   Widget build(BuildContext context) => Container(
@@ -217,15 +236,9 @@ class _ActiveLetter extends StatelessWidget {
             BoxShadow(color: Color(0xFF6B9D27), offset: Offset(0, 4)),
           ],
         ),
-        child: Text(
-          letter,
-          style: GoogleFonts.baloo2(
-            color: Colors.white,
-            fontSize: 42,
-            height: 1,
-            fontWeight: FontWeight.w800,
-            shadows: const [Shadow(color: Color(0xFF4A7D1A), offset: Offset(0, 2))],
-          ),
+        child: Padding(
+          padding: const EdgeInsets.all(5),
+          child: Image.asset(letterAsset, fit: BoxFit.contain),
         ),
       );
 }
@@ -257,12 +270,55 @@ class _RewardPanel extends StatelessWidget {
       );
 }
 
-class _Keyboard extends StatelessWidget {
-  final ValueChanged<LetterItem> onPressed;
-  const _Keyboard({required this.onPressed});
+class _Keyboard extends StatefulWidget {
+  final List<LetterItem> letters;
+  final void Function(LetterItem item, int slot) onPressed;
+  const _Keyboard({required this.letters, required this.onPressed});
 
   @override
-  Widget build(BuildContext context) => Container(
+  State<_Keyboard> createState() => _KeyboardState();
+}
+
+class _KeyboardState extends State<_Keyboard>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _bounceController;
+  int? _pressedSlot;
+
+  @override
+  void initState() {
+    super.initState();
+    _bounceController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 260),
+    );
+  }
+
+  @override
+  void dispose() {
+    _bounceController.dispose();
+    super.dispose();
+  }
+
+  void _tap(int slot) {
+    setState(() => _pressedSlot = slot);
+    _bounceController.forward(from: 0).whenComplete(() {
+      if (mounted) setState(() => _pressedSlot = null);
+    });
+    widget.onPressed(widget.letters[slot], slot);
+  }
+
+  double _scaleFor(int slot) {
+    if (_pressedSlot != slot) return 1;
+    final progress = _bounceController.value;
+    if (progress < .35) return 1 - .08 * (progress / .35);
+    if (progress < .68) return .92 + .13 * ((progress - .35) / .33);
+    return 1.05 - .05 * ((progress - .68) / .32);
+  }
+
+  @override
+  Widget build(BuildContext context) => AnimatedBuilder(
+        animation: _bounceController,
+        builder: (context, _) => Container(
         padding: const EdgeInsets.all(3),
         decoration: BoxDecoration(
           color: const Color(0xFF741142),
@@ -275,11 +331,28 @@ class _Keyboard extends StatelessWidget {
                 children: List.generate(14, (_) => Expanded(child: Container(decoration: const BoxDecoration(color: Color(0xFFFFFAF2), border: Border(right: BorderSide(color: Color(0xFFD8BBC4))))))),
               ),
               Row(
-                children: List.generate(pianoLetters.length, (index) => Expanded(
-                  child: GestureDetector(
+                children: List.generate(widget.letters.length, (index) => Expanded(
+                  child: Transform.scale(
+                    alignment: Alignment.bottomCenter,
+                    scale: _scaleFor(index),
+                    child: GestureDetector(
                     behavior: HitTestBehavior.opaque,
-                    onTap: () => onPressed(pianoLetters[index]),
-                    child: const SizedBox.expand(),
+                    onTap: () => _tap(index),
+                    child: Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: Text(
+                          widget.letters[index].letter,
+                          style: const TextStyle(
+                            color: Color(0xFF9B5875),
+                            fontWeight: FontWeight.w800,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ),
+                    ),
+                    ),
                   ),
                 )),
               ),
@@ -292,6 +365,7 @@ class _Keyboard extends StatelessWidget {
               )),
             ],
           ),
+        ),
         ),
       );
 }
@@ -307,13 +381,6 @@ class _Ear extends StatelessWidget {
         top: -size * .02,
         child: Container(width: size, height: size, decoration: BoxDecoration(color: const Color(0xFFFF6EAF), shape: BoxShape.circle, border: Border.all(color: const Color(0xFFFFB6DB), width: 4))),
       );
-}
-
-class _Speaker extends StatelessWidget {
-  final double size;
-  const _Speaker({required this.size});
-  @override
-  Widget build(BuildContext context) => Container(width: size, height: size, decoration: const BoxDecoration(color: Color(0xFFFFA7CF), shape: BoxShape.circle), child: const Icon(Icons.volume_up_rounded, color: Color(0xFF9A1B58)));
 }
 
 class _MusicButton extends StatelessWidget {
