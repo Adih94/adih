@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'core/theme/app_theme.dart';
 import 'screens/splash/splash_screen.dart';
 import 'screens/lesson/letter_lesson_screen.dart';
+import 'features/piano_huruf/piano_screen.dart';
 
 class AplikasiBelajarApp extends StatelessWidget {
   const AplikasiBelajarApp({super.key});
@@ -14,7 +15,9 @@ class AplikasiBelajarApp extends StatelessWidget {
       theme: AppTheme.lightTheme,
       home: Uri.base.queryParameters['screen'] == 'huruf'
           ? const LetterLessonScreen()
-          : const SplashScreen(),
+          : Uri.base.queryParameters['screen'] == 'piano'
+              ? const PianoScreen()
+              : const SplashScreen(),
     );
   }
 }

@@ -7,6 +7,7 @@ import '../../widgets/category_icon_button.dart';
 import '../../widgets/cute_arrow_button.dart';
 import '../category/category_screen.dart';
 import '../lesson/letter_lesson_screen.dart';
+import '../../features/piano_huruf/piano_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -105,6 +106,17 @@ class _HomeScreenState extends State<HomeScreen> {
                                         MaterialPageRoute(
                                           builder: (_) =>
                                               const LetterLessonScreen(),
+                                        ),
+                                      );
+                                      return;
+                                    }
+
+                                    // Piano langsung membuka permainan, tanpa
+                                    // halaman daftar mode/lesson di tengah.
+                                    if (category.id == 'piano') {
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (_) => const PianoScreen(),
                                         ),
                                       );
                                       return;

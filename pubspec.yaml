@@ -81,6 +81,8 @@ flutter:
     - assets/images/right_button.png
     - assets/audio/letters/
     - assets/audio/words/
+    - assets/audio/piano/
+    - assets/audio/music/
     # - assets/images/
     # - assets/images/icons/
     # - assets/audio/letters/

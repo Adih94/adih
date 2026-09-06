@@ -113,24 +113,8 @@ class CategoryRepository {
           ),
         ];
       case 'piano':
-        return const [
-          LessonModel(
-            id: 'piano_bebas',
-            categoryId: 'piano',
-            title: 'Belajar Piano Bebas',
-            backgroundColor: AppColors.primaryBlue,
-            fileSizeLabel: '324 KB',
-            vipTier: VipTier.platinum,
-          ),
-          LessonModel(
-            id: 'piano_lagu',
-            categoryId: 'piano',
-            title: 'Belajar Lagu',
-            backgroundColor: AppColors.primaryPink,
-            fileSizeLabel: '356 KB',
-            vipTier: VipTier.platinum,
-          ),
-        ];
+        // Piano dibuka langsung dari HomeScreen, tanpa daftar lesson.
+        return const [];
       case 'menulis':
         return const [
           LessonModel(
