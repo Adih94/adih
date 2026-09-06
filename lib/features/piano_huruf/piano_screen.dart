@@ -328,7 +328,19 @@ class _KeyboardState extends State<_Keyboard>
           builder: (context, constraints) => Stack(
             children: [
               Row(
-                children: List.generate(14, (_) => Expanded(child: Container(decoration: const BoxDecoration(color: Color(0xFFFFFAF2), border: Border(right: BorderSide(color: Color(0xFFD8BBC4))))))),
+                children: List.generate(
+                  widget.letters.length,
+                  (_) => Expanded(
+                    child: Container(
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFFFFAF2),
+                        border: Border(
+                          right: BorderSide(color: Color(0xFFD8BBC4)),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               ),
               Row(
                 children: List.generate(widget.letters.length, (index) => Expanded(
@@ -356,13 +368,21 @@ class _KeyboardState extends State<_Keyboard>
                   ),
                 )),
               ),
-              ...[.05, .16, .30, .43, .55, .69, .82].map((x) => Positioned(
-                left: constraints.maxWidth * x,
-                top: 0,
-                width: constraints.maxWidth * .045,
-                height: constraints.maxHeight * .57,
-                child: Container(decoration: BoxDecoration(color: const Color(0xFF251B22), borderRadius: BorderRadius.circular(5))),
-              )),
+              ...[0, 1, 3, 4, 5, 7, 8, 10].map((keyIndex) {
+                final keyWidth = constraints.maxWidth / widget.letters.length;
+                return Positioned(
+                  left: keyWidth * (keyIndex + 1) - keyWidth * .23,
+                  top: 0,
+                  width: keyWidth * .46,
+                  height: constraints.maxHeight * .57,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF251B22),
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                  ),
+                );
+              }),
             ],
           ),
         ),
