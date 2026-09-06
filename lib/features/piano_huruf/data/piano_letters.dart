@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/letter_item.dart';
 
-/// Initial, deliberately small, data set for the Piano Huruf prototype.
+/// The first complete piano row, matching the A-G learning board.
 const pianoLetters = <LetterItem>[
   LetterItem(
     id: 'a', letter: 'A', word: 'AWAN', emoji: '☁️',
@@ -29,9 +29,21 @@ const pianoLetters = <LetterItem>[
     color: Color(0xFF54B9ED),
   ),
   LetterItem(
-    id: 'e', letter: 'E', word: 'EMAK', emoji: '👩',
+    id: 'e', letter: 'E', word: 'ES KRIM', emoji: '🍦',
     illustrationAsset: 'assets/images/illus_e.png',
     voiceAsset: 'audio/letters/e.mp3', pianoAsset: 'audio/piano/e.wav',
     color: Color(0xFFAA83F0),
+  ),
+  LetterItem(
+    id: 'f', letter: 'F', word: 'FOTO', emoji: '📷',
+    illustrationAsset: 'assets/images/illus_f.png',
+    voiceAsset: 'audio/letters/f.mp3', pianoAsset: 'audio/piano/f.wav',
+    color: Color(0xFF9B75E8),
+  ),
+  LetterItem(
+    id: 'g', letter: 'G', word: 'GAJAH', emoji: '🐘',
+    illustrationAsset: 'assets/images/illus_g.png',
+    voiceAsset: 'audio/letters/g.mp3', pianoAsset: 'audio/piano/g.wav',
+    color: Color(0xFFE882BE),
   ),
 ];

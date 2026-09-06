@@ -48,12 +48,18 @@ class _PianoKeyState extends State<PianoKey> with SingleTickerProviderStateMixin
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      label: 'Huruf ${widget.item.letter}, ${widget.item.word}',
-      child: GestureDetector(
-        onTap: _tap,
-        child: AnimatedBuilder(
+    return LayoutBuilder(builder: (context, constraints) {
+      final compact = constraints.maxWidth < 105 || constraints.maxHeight < 150;
+      final letterSize = compact ? 31.0 : 50.0;
+      final wordSize = compact ? 10.0 : 17.0;
+      final padding = compact ? 4.0 : 10.0;
+
+      return Semantics(
+        button: true,
+        label: 'Huruf ${widget.item.letter}, ${widget.item.word}',
+        child: GestureDetector(
+          onTap: _tap,
+          child: AnimatedBuilder(
           animation: _controller,
           builder: (context, child) => Transform.scale(
             scale: _controller.value,
@@ -61,7 +67,7 @@ class _PianoKeyState extends State<PianoKey> with SingleTickerProviderStateMixin
           ),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 180),
-            padding: const EdgeInsets.all(10),
+            padding: EdgeInsets.all(padding),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
@@ -72,8 +78,8 @@ class _PianoKeyState extends State<PianoKey> with SingleTickerProviderStateMixin
                   Color.lerp(widget.item.color, Colors.black, .17)!,
                 ],
               ),
-              borderRadius: BorderRadius.circular(28),
-              border: Border.all(color: Colors.white, width: 4),
+              borderRadius: BorderRadius.circular(compact ? 14 : 28),
+              border: Border.all(color: Colors.white, width: compact ? 2 : 4),
               boxShadow: [
                 BoxShadow(
                   color: widget.item.color.withOpacity(widget.isSelected ? .7 : .38),
@@ -90,7 +96,7 @@ class _PianoKeyState extends State<PianoKey> with SingleTickerProviderStateMixin
                   widget.item.letter,
                   style: GoogleFonts.baloo2(
                     color: Colors.white,
-                    fontSize: 50,
+                    fontSize: letterSize,
                     height: .9,
                     fontWeight: FontWeight.w800,
                     shadows: const [
@@ -98,7 +104,7 @@ class _PianoKeyState extends State<PianoKey> with SingleTickerProviderStateMixin
                     ],
                   ),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: compact ? 1 : 4),
                 Expanded(
                   child: FittedBox(
                     fit: BoxFit.contain,
@@ -109,7 +115,7 @@ class _PianoKeyState extends State<PianoKey> with SingleTickerProviderStateMixin
                   widget.item.word,
                   style: GoogleFonts.baloo2(
                     color: Colors.white,
-                    fontSize: 17,
+                    fontSize: wordSize,
                     height: 1,
                     fontWeight: FontWeight.w800,
                   ),
@@ -117,8 +123,9 @@ class _PianoKeyState extends State<PianoKey> with SingleTickerProviderStateMixin
               ],
             ),
           ),
+          ),
         ),
-      ),
-    );
+      );
+    });
   }
 }
