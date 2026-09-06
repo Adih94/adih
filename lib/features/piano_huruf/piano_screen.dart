@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -24,6 +26,9 @@ class _PianoScreenState extends State<PianoScreen>
   final _game = GameManager();
   late final AnimationController _starController;
   int _firstVisibleIndex = 0;
+  Timer? _autoPlayTimer;
+  bool _isAutoPlaying = false;
+  int _autoPlayIndex = 0;
 
   List<LetterItem> get _visibleLetters => pianoLetters
       .skip(_firstVisibleIndex)
@@ -42,6 +47,7 @@ class _PianoScreenState extends State<PianoScreen>
 
   @override
   void dispose() {
+    _autoPlayTimer?.cancel();
     _starController.dispose();
     _audio.dispose();
     _game.dispose();
@@ -52,18 +58,46 @@ class _PianoScreenState extends State<PianoScreen>
     _game.press(item);
     _starController.forward(from: 0);
     _audio.playLetter(item);
+  }
 
-    // Pressing L changes the first key from A to M; the next page is M-X.
-    if (slot == _visibleLetters.length - 1) {
-      Future<void>.delayed(const Duration(milliseconds: 190), () {
-        if (!mounted) return;
-        setState(() {
-          _firstVisibleIndex = _firstVisibleIndex + 12 >= pianoLetters.length
-              ? 0
-              : _firstVisibleIndex + 12;
-        });
-      });
+  void _swapKeys() {
+    setState(() {
+      _firstVisibleIndex = _firstVisibleIndex + 12 >= pianoLetters.length
+          ? 0
+          : _firstVisibleIndex + 12;
+    });
+  }
+
+  void _toggleAutoPlay() {
+    if (_isAutoPlaying) {
+      _autoPlayTimer?.cancel();
+      setState(() => _isAutoPlaying = false);
+      return;
     }
+    setState(() {
+      _isAutoPlaying = true;
+      _autoPlayIndex = 0;
+    });
+    _playNextAutoNote();
+  }
+
+  void _playNextAutoNote() {
+    if (!mounted || !_isAutoPlaying) return;
+    if (_autoPlayIndex >= pianoLetters.length) {
+      setState(() => _isAutoPlaying = false);
+      return;
+    }
+
+    final item = pianoLetters[_autoPlayIndex];
+    _game.press(item);
+    _starController.forward(from: 0);
+    _audio.playLetter(item);
+    setState(() => _firstVisibleIndex = (_autoPlayIndex ~/ 12) * 12);
+    _autoPlayIndex++;
+    _autoPlayTimer = Timer(
+      const Duration(milliseconds: 720),
+      _playNextAutoNote,
+    );
   }
 
   @override
@@ -90,6 +124,9 @@ class _PianoScreenState extends State<PianoScreen>
                         visibleLetters: _visibleLetters,
                         starProgress: _starController.value,
                         onPressed: _press,
+                        isAutoPlaying: _isAutoPlaying,
+                        onAutoPlayTap: _toggleAutoPlay,
+                        onSwapTap: _swapKeys,
                       ),
                     ),
                   ),
@@ -106,12 +143,18 @@ class _PinkToyPiano extends StatelessWidget {
   final List<LetterItem> visibleLetters;
   final double starProgress;
   final void Function(LetterItem item, int slot) onPressed;
+  final bool isAutoPlaying;
+  final VoidCallback onAutoPlayTap;
+  final VoidCallback onSwapTap;
 
   const _PinkToyPiano({
     required this.active,
     required this.visibleLetters,
     required this.starProgress,
     required this.onPressed,
+    required this.isAutoPlaying,
+    required this.onAutoPlayTap,
+    required this.onSwapTap,
   });
 
   @override
@@ -163,8 +206,24 @@ class _PinkToyPiano extends StatelessWidget {
                     ),
                     Positioned(
                       right: unit * .035,
+                      top: unit * .075,
+                      child: _MusicButton(
+                        size: unit * .18,
+                        icon: isAutoPlaying
+                            ? Icons.stop_rounded
+                            : Icons.music_note_rounded,
+                        active: isAutoPlaying,
+                        onTap: onAutoPlayTap,
+                      ),
+                    ),
+                    Positioned(
+                      right: unit * .035,
                       bottom: unit * .22,
-                      child: _MusicButton(size: unit * .20),
+                      child: _MusicButton(
+                        size: unit * .20,
+                        icon: Icons.swap_horiz_rounded,
+                        onTap: onSwapTap,
+                      ),
                     ),
                     Positioned(
                       left: unit * .08,
@@ -405,9 +464,32 @@ class _Ear extends StatelessWidget {
 
 class _MusicButton extends StatelessWidget {
   final double size;
-  const _MusicButton({required this.size});
+  final IconData icon;
+  final VoidCallback onTap;
+  final bool active;
+
+  const _MusicButton({
+    required this.size,
+    required this.icon,
+    required this.onTap,
+    this.active = false,
+  });
+
   @override
-  Widget build(BuildContext context) => Container(width: size, height: size, decoration: BoxDecoration(color: const Color(0xFFFFD62B), shape: BoxShape.circle, border: Border.all(color: const Color(0xFFFF8FBC), width: 3)), child: const Icon(Icons.music_note_rounded, color: Color(0xFFE92E82)));
+  Widget build(BuildContext context) => InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(size),
+        child: Ink(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(
+            color: active ? const Color(0xFFFFF0A2) : const Color(0xFFFFD62B),
+            shape: BoxShape.circle,
+            border: Border.all(color: const Color(0xFFFF8FBC), width: 3),
+          ),
+          child: Icon(icon, color: const Color(0xFFE92E82), size: size * .62),
+        ),
+      );
 }
 
 class _HomeButton extends StatelessWidget {
