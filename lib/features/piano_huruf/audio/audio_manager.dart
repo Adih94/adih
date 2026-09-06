@@ -4,10 +4,8 @@ import '../models/letter_item.dart';
 
 /// Keeps music, piano effects and letter voices on independent players.
 ///
-/// Add `assets/audio/piano/*.wav` and `assets/audio/music/background_01.mp3`
-/// when the final recordings are ready. The screen remains usable while the
-/// optional prototype music/note assets are absent; existing letter voices
-/// already play from the bundled assets.
+/// Piano notes use the bundled `abc_piano_individual_A-Z/A-Z.wav` assets,
+/// while voice and music remain on their own playback channels.
 class AudioManager {
   static const _maximumConcurrentPianoNotes = 8;
 
@@ -48,9 +46,8 @@ class AudioManager {
       _disposePiano(pianoPlayer);
     }
 
-    // Voice has its own channel; it never pauses background music or piano.
-    await _voicePlayer.setVolume(_voiceVolume);
-    await _voicePlayer.play(AssetSource(item.voiceAsset));
+    // Piano Huruf is instrument-only: do not pronounce A/B/C on each tap.
+    // The voice channel remains available for guided learning modes later.
   }
 
   Future<void> setMusicVolume(double value) async {

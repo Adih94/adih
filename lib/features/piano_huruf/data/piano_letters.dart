@@ -32,7 +32,7 @@ final pianoLetters = List<LetterItem>.generate(26, (index) {
     letterAsset: 'assets/images/letter_$key.png',
     illustrationAsset: 'assets/images/illus_$key.png',
     voiceAsset: 'audio/letters/$key.mp3',
-    pianoAsset: 'audio/piano/$key.wav',
+    pianoAsset: 'audio/abc_piano_individual_A-Z/${key.toUpperCase()}.wav',
     color: _colors[index % _colors.length],
   );
 });
